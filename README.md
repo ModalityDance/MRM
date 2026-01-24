@@ -27,7 +27,7 @@
 
 <div align="center">
   <figure>
-    <img src="./assets/overview.png" alt="Overview" style="max-width: 80%; height: auto;">
+    <img src="./assets/overview.png" alt="Overview" style="width: 50%; height: auto;">
     <br>
     <figcaption><em>Quick Overview of Meta Reward Modeling.</em></figcaption>
   </figure>
@@ -161,7 +161,7 @@ At a high level, the workflow proceeds as follows:
 
 3. Robust Meta Optimization — During training, user-level losses are reweighted to focus more on hard-to-model users, ensuring stable performance across diverse and long-tail preferences.
 
-<div align="center"> <figure> <img src="./assets/method.png" alt="Method Overview" style="max-width: 70%; height: auto;"> <br> <figcaption><em>Overview of Meta Reward Modeling.</em></figcaption> </figure> </div>
+<div align="center"> <figure> <img src="./assets/method.png" alt="Method Overview" style="width: 50%; height: auto;"> <br> <figcaption><em>Overview of Meta Reward Modeling.</em></figcaption> </figure> </div>
 
 
 ## 🌱 **Acknowledgements** <span id="acknowledgements"></span>
