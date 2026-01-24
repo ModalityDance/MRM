@@ -186,15 +186,15 @@ This project is licensed under the **MIT License**. Please refer to the LICENSE 
 <tr>
 <td align="center">
   <b>🌟 PersonalWAB</b><br/>
-  <a href="https://hongrucai.github.io/PersonalWAB/">https://hongrucai.github.io/PersonalWAB/</a>
+  <a href="https://hongrucai.github.io/PersonalWAB/">Project Pgae</a>
 </td>
 <td align="center">
   <b>🚀 LoRe</b><br/>
-  <a href="https://github.com/facebookresearch/LoRe">https://github.com/facebookresearch/LoRe</a>
+  <a href="https://github.com/facebookresearch/LoRe">Code</a>
 </td>
 <td align="center">
   <b>🔧 SynthesizeMe</b><br/>
-  <a href="https://github.com/SALT-NLP/SynthesizeMe">https://github.com/SALT-NLP/SynthesizeMe</a>
+  <a href="https://github.com/SALT-NLP/SynthesizeMe">Code</a>
 </td>
 </tr>
 </table>
