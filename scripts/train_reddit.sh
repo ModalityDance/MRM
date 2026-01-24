@@ -1,0 +1,20 @@
+python train.py \
+--embed_pt  data/emb/reddit/V2.pt \
+--meta_json data/emb/reddit/V2.json \
+--output_path output/reddit150/ \
+--dataset REDDIT \
+--seen_train_limit 150 \
+--unseen_train_limit 50 \
+--hidden_layers 2 \
+--inner_lr 5e-3 \
+--meta_lr  5e-3 \
+--train_inner_epochs 1 \
+--eval_inner_epochs 1 \
+--tasks_per_batch 2 \
+--epochs 200 \
+--log_freq 1 \
+--save_freq 10 \
+--val_ratio 0.9 \
+--score_threshold -1 \
+--rpo_ratio 0.5 \
+--rpo_gamma 0.5

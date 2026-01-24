@@ -1,0 +1,13 @@
+datasets==3.5.0
+higher==0.2.1
+matplotlib==3.10.6
+numpy
+pandas==2.3.3
+pydantic==2.11.10
+Requests==2.32.5
+scikit_learn==1.7.2
+torch==2.4.0
+tqdm==4.67.1
+transformers==4.51.1
+wandb==0.22.1
+accelerate
