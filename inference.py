@@ -157,7 +157,6 @@ def parse_args():
 
     # system
     ap.add_argument("--device", default="cuda" if torch.cuda.is_available() else "cpu")
-    ap.add_argument("--output_path", default="inference_output")
 
     return ap.parse_args()
 
@@ -171,18 +170,6 @@ def mean_std(arr, ddof=0):
 
 if __name__ == "__main__":
     args = parse_args()
-
-    current_time = datetime.now().strftime("%Y%m%d_%H%M")
-    run_name = f"{current_time}_infer_seed{args.seed}_{os.path.basename(args.ckpt)}"
-    out_dir = os.path.join(args.output_path, run_name)
-    os.makedirs(out_dir, exist_ok=True)
-
-    log_file = os.path.join(out_dir, "inference.log")
-    logging.basicConfig(filename=log_file, level=logging.INFO, format="%(asctime)s - %(message)s")
-    logger = logging.getLogger(__name__)
-
-    logger.info(f"Inference args: {vars(args)}")
-    print(f"All results will be written under {out_dir}")
 
     emb = torch.load(args.embed_pt, map_location="cpu", weights_only=True)
     with open(args.meta_json, "r") as f:
@@ -218,9 +205,9 @@ if __name__ == "__main__":
     # build + load ckpt
     model = MRM(args.input_dim, args.hidden_layers, use_bias=args.use_bias)
     missing, unexpected = load_ckpt_into_model(model, args.ckpt, args.device)
+    print(f"Model loaded from {args.ckpt}")
     if missing or unexpected:
         msg = f"load_state_dict: missing={missing}, unexpected={unexpected}"
-        logger.info(msg)
         print(msg)
 
     # inference (with per-user adaptation)
@@ -231,8 +218,8 @@ if __name__ == "__main__":
     unseen_acc = float(np.mean(unseen_accs)) if len(unseen_accs) > 0 else float("nan")
     overall_acc = float(np.mean(seen_accs + unseen_accs)) if (len(seen_accs) + len(unseen_accs)) > 0 else float("nan")
 
-    log_and_print(logger, f"Seed={args.seed} | Seen acc {seen_acc:.3f} | Unseen acc {unseen_acc:.3f} | Overall {overall_acc:.3f}")
-    log_and_print(logger, f"Seen loss {seen_loss:.4f}, Seen support loss {seen_sup_loss:.4f}")
-    log_and_print(logger, f"Unseen loss {unseen_loss:.4f}, Unseen support loss {unseen_sup_loss:.4f}")
+    print(f"Seen loss {seen_loss:.4f}, Seen support loss {seen_sup_loss:.4f}")
+    print(f"Unseen loss {unseen_loss:.4f}, Unseen support loss {unseen_sup_loss:.4f}")
+    print(f"Seed={args.seed} | Seen acc {seen_acc:.3f} | Unseen acc {unseen_acc:.3f} | Overall {overall_acc:.3f}")
 
-    print(f"\n✅ Done. Logs: {log_file}")
+

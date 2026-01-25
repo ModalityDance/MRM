@@ -17,7 +17,7 @@
   </a>
 
   <!-- HuggingFace Models -->
-  <a href="{huggingface_url}">
+  <a href="https://huggingface.co/collections/ModalityDance/mrm">
     <img src="https://img.shields.io/badge/HuggingFace-Models-fcc21b?style=for-the-badge&logo=huggingface&logoColor=white" alt="HF Models" height="22">
   </a>
 
@@ -113,39 +113,39 @@ python scripts/preprocess_reddit.py \
 After data preparation, you can start training the meta reward model using the following command:
 for PRISM:
 ```bash
-bash scripts/train_prism.sh
+bash scripts/train_on_prism.sh
 ```
 
 for Reddit TLDR:
 
 ```bash
-bash scripts/train_reddit.sh
+bash scripts/train_on_reddit.sh
 ```
-Both scripts will train the model with our default hyperparameters, and evaluate the model on the test set after predefined intervals. Also, logs and model checkpoints will be saved under the `outputs/` directory.
+Both scripts will train the model with our default hyperparameters, and evaluate the model on the test set after predefined intervals. Also, logs and model checkpoints will be saved under the `output/` directory.
 
 > [!NOTE]
 > 1. Our training pipelines include automatic evaluation and checkpointing, so typically you do not need to run the evaluation script.
 > 
 > 2. You can modify the hyperparameters in the training scripts as needed. For example, change the 'seen_train_limit' to 100 to replicate the results of Reddit TLDR with 100 training samples per user.
 >
-> 3. If you want to skip the training phase and directly evaluate with our pretrained checkpoints. Download from [here](https://huggingface.co/HannahRoseKirk/mrm-checkpoints).
+> 3. If you want to skip the training phase and directly evaluate with our pretrained checkpoints. Download from [here](https://huggingface.co/collections/ModalityDance/mrm).
 
 #### **Evaluation**
 
 After training, you can evaluate the saved model checkpoints using the following commands:
 For PRISM:
 ```bash
-bash scripts/test_prism.sh
+bash scripts/test_on_prism.sh
 ```
 For Reddit TLDR:
 ```bash
-bash scripts/test_reddit.sh
+bash scripts/test_on_reddit.sh
 ```
 
 > [!IMPORTANT]
 > 1. As every training run will randomly split the users and samples, please make sure to use the same setting (inner epoch, inner leaerning rate, and random seed) with the training phase when doing evaluation for consistent results.
 >
-> 2.For our released checkpoints, please refer to the provided inference scripts for the exact hyperparameters used.
+> 2. For our released checkpoints, please refer to the provided inference scripts for the exact hyperparameters used.
 
 
 ## ✨ How It Works <span id="how-it-works"></span>
@@ -186,15 +186,15 @@ This project is licensed under the **MIT License**. Please refer to the LICENSE 
 <tr>
 <td align="center">
   <b>🌟 PersonalWAB</b><br/>
-  <a href="https://hongrucai.github.io/PersonalWAB/">Project Pgae</a>
+  <a href="https://hongrucai.github.io/PersonalWAB/">Project Page</a>
 </td>
 <td align="center">
   <b>🚀 LoRe</b><br/>
-  <a href="https://github.com/facebookresearch/LoRe">Code</a>
+  <a href="https://github.com/facebookresearch/LoRe">GitHub Repo</a>
 </td>
 <td align="center">
   <b>🔧 SynthesizeMe</b><br/>
-  <a href="https://github.com/SALT-NLP/SynthesizeMe">Code</a>
+  <a href="https://github.com/SALT-NLP/SynthesizeMe">GitHub Repo</a>
 </td>
 </tr>
 </table>

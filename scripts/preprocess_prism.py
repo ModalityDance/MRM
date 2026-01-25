@@ -9,18 +9,12 @@ import statistics
 import requests
 import os
 import time
-
 import argparse
-import json
-import statistics
-from copy import deepcopy
-from typing import Dict, List
-
 import torch
-from tqdm import tqdm
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 
 os.makedirs("data/prism", exist_ok=True)
+os.makedirs("data/emb/prism", exist_ok=True)
 
 def is_valid_jsonl(filepath):
     """Check if a file is valid JSONL (not HTML rate limit page)"""
@@ -240,121 +234,93 @@ print(f"Remaining users: {len(data_user)}")
 print(f"Remaining dialogs: {sum(len(uinfo['dialog_ids']) for uinfo in data_user.values())}")
 user_ids = np.array(list(data_user.keys()))
 
+add_textual_info = False
+add_history = True
 
-def parse_args():
-    parser = argparse.ArgumentParser()
+aggregate_rejected = False   
 
-    # required
-    parser.add_argument("--model_path", type=str, required=True)
-    parser.add_argument("--save_prefix", type=str, required=True)
+output_records = []
 
-    # optional switches for dataset construction
-    parser.add_argument(
-        "--add_textual_info",
-        action="store_true",
-        help="If set, prepend user textual demographics info to each user utterance."
-    )
-    parser.add_argument(
-        "--no_history",
-        action="store_true",
-        help="If set, do NOT include conversation history context."
-    )
-    parser.add_argument(
-        "--aggregate_rejected",
-        action="store_true",
-        help="If set, join all rejected responses into one string per turn."
-    )
+for user_id in user_ids:
+    for dialog_id in data_user[user_id]["dialog_ids"]:
+        dialog = data_dialog[dialog_id]
+        history = []
 
-    return parser.parse_args()
+        textual_info = ""
+        if add_textual_info:
+            demographics = data_user[user_id].get("demographics", {})
+            preference = ", ".join(demographics.get("preference", []))
+            textual_info = f"User textual information: preference: {preference}; "
+            for k, v in demographics.items():
+                if k != "preference":
+                    textual_info += f"{k}: {v}; "
 
+        for turn in dialog["turns"]:
+            if not (turn['user_utterance'] and turn['chosen_utterance'] and turn['rejected_utterance']):
+                continue
 
-def build_output_records(
-    user_ids,
-    data_user,
-    data_dialog,
-    add_textual_info: bool,
-    add_history: bool,
-    aggregate_rejected: bool,
-):
-    output_records = []
+            conv = []
+            if add_history:
+                for past in history:
+                    conv.append({"role": "user", "content": past["user"]})
+                    conv.append({"role": "assistant", "content": past["assistant"]})
 
-    for user_id in user_ids:
-        for dialog_id in data_user[user_id]["dialog_ids"]:
-            dialog = data_dialog[dialog_id]
-            history = []
+            user_msg = turn["user_utterance"][0]
+            if add_textual_info and textual_info:
+                user_msg = textual_info + "\n" + user_msg
+            conv.append({"role": "user", "content": user_msg})
 
-            textual_info = ""
-            if add_textual_info:
-                demographics = data_user[user_id].get("demographics", {})
-                preference = ", ".join(demographics.get("preference", []))
-                textual_info = f"User textual information: preference: {preference}; "
-                for k, v in demographics.items():
-                    if k != "preference":
-                        textual_info += f"{k}: {v}; "
+            chosen_txt   = turn["chosen_utterance"][0]
+            rejected_list = list(turn["rejected_utterance"])  
+            chosen_score  = turn.get("chosen_utterance_scores", [None])[0]
+            rejected_scores_full = turn.get("rejected_utterance_scores", [])
 
-            for turn in dialog["turns"]:
-                if not (turn["user_utterance"] and turn["chosen_utterance"] and turn["rejected_utterance"]):
-                    continue
+            if aggregate_rejected:
+                rejected_text = '\n'.join(rejected_list)
+                rej_scores = []
+                for idx, rej in enumerate(rejected_list):
+                    if idx < len(rejected_scores_full):
+                        rej_scores.append(rejected_scores_full[idx])
+                rejected_score_mean = statistics.mean(rej_scores) if rej_scores else None
 
-                conv = []
-                if add_history:
-                    for past in history:
-                        conv.append({"role": "user", "content": past["user"]})
-                        conv.append({"role": "assistant", "content": past["assistant"]})
-
-                user_msg = turn["user_utterance"][0]
-                if add_textual_info and textual_info:
-                    user_msg = textual_info + "\n" + user_msg
-                conv.append({"role": "user", "content": user_msg})
-
-                chosen_txt = turn["chosen_utterance"][0]
-                rejected_list = list(turn["rejected_utterance"])
-                chosen_score = turn.get("chosen_utterance_scores", [None])[0]
-                rejected_scores_full = turn.get("rejected_utterance_scores", [])
-
-                if aggregate_rejected:
-                    rejected_text = "\n".join(rejected_list)
-                    rej_scores = []
-                    for idx in range(len(rejected_list)):
-                        if idx < len(rejected_scores_full):
-                            rej_scores.append(rejected_scores_full[idx])
-                    rejected_score_mean = statistics.mean(rej_scores) if rej_scores else None
+                output_records.append({
+                    "user_id": user_id,
+                    "conversation_id": dialog_id,
+                    "conv": deepcopy(conv),
+                    "chosen": chosen_txt,
+                    "rejected": rejected_text,                
+                    "chosen_score": chosen_score,
+                    "rejected_score": rejected_score_mean,    
+                })
+            else:
+                for idx, rejected in enumerate(rejected_list):
+                    rej_score = None
+                    if idx < len(rejected_scores_full):
+                        rej_score = rejected_scores_full[idx]
 
                     output_records.append({
                         "user_id": user_id,
                         "conversation_id": dialog_id,
                         "conv": deepcopy(conv),
                         "chosen": chosen_txt,
-                        "rejected": rejected_text,
+                        "rejected": rejected,                  
                         "chosen_score": chosen_score,
-                        "rejected_score": rejected_score_mean,
+                        "rejected_score": rej_score,
                     })
-                else:
-                    for idx, rejected in enumerate(rejected_list):
-                        rej_score = rejected_scores_full[idx] if idx < len(rejected_scores_full) else None
-                        output_records.append({
-                            "user_id": user_id,
-                            "conversation_id": dialog_id,
-                            "conv": deepcopy(conv),
-                            "chosen": chosen_txt,
-                            "rejected": rejected,
-                            "chosen_score": chosen_score,
-                            "rejected_score": rej_score,
-                        })
 
-                history.append({
-                    "user": turn["user_utterance"][0],
-                    "assistant": chosen_txt,
-                })
+            history.append({
+                "user": turn["user_utterance"][0],
+                "assistant": chosen_txt
+            })
 
-    print(f"✅ Total examples to embed: {len(output_records)} (aggregate={aggregate_rejected})")
-    return output_records
-
+print(f"✅ Total examples to embed: {len(output_records)} (aggregate={aggregate_rejected})")
 
 @torch.no_grad()
 def extract_embeddings_single_sample(model, head, tokenizer, user_data, save_prefix="emb_output"):
+    all_data = user_data
+
     user_to_samples: Dict[str, List[Dict]] = {}
-    for sample in user_data:
+    for sample in all_data:  
         user_id = sample["user_id"]
         user_to_samples.setdefault(user_id, []).append(sample)
 
@@ -365,16 +331,17 @@ def extract_embeddings_single_sample(model, head, tokenizer, user_data, save_pre
     for user_id, samples in tqdm(user_to_samples.items(), desc="Processing users"):
         metadata_per_user[user_id] = []
         for sample in samples:
+
             conv_chosen = sample["conv"] + [{"role": "assistant", "content": sample["chosen"]}]
             conv_rejected = sample["conv"] + [{"role": "assistant", "content": sample["rejected"]}]
 
-            pos_ids = tokenizer.apply_chat_template(conv_chosen, tokenize=True, return_tensors="pt").to(model.device)
-            neg_ids = tokenizer.apply_chat_template(conv_rejected, tokenize=True, return_tensors="pt").to(model.device)
+            pos_text = tokenizer.apply_chat_template(conv_chosen, tokenize=True, return_tensors="pt").to(model.device)
+            neg_text = tokenizer.apply_chat_template(conv_rejected, tokenize=True, return_tensors="pt").to(model.device)
 
-            outputs_pos = model(pos_ids, output_hidden_states=True)
+            outputs_pos = model(pos_text, output_hidden_states=True)
             hidden_pos = outputs_pos.hidden_states[-1]
             pos_score = outputs_pos.logits[0][0].item()
-            last_emb_pos = hidden_pos[0, -1].to("cpu")
+            last_emb_pos = hidden_pos[0, -1].to("cpu")  
             cls_score = head(last_emb_pos.unsqueeze(0).to(model.device)).item()
             if abs(cls_score - pos_score) > 1e-3:
                 print("positive score mismatch:", cls_score, pos_score)
@@ -383,10 +350,10 @@ def extract_embeddings_single_sample(model, head, tokenizer, user_data, save_pre
             chosen_idx = current_idx
             current_idx += 1
 
-            outputs_neg = model(neg_ids, output_hidden_states=True)
+            outputs_neg = model(neg_text, output_hidden_states=True)
             hidden_neg = outputs_neg.hidden_states[-1]
             neg_score = outputs_neg.logits[0][0].item()
-            last_emb_neg = hidden_neg[0, -1].to("cpu")
+            last_emb_neg = hidden_neg[0, -1].to("cpu")  
             cls_score = head(last_emb_neg.unsqueeze(0).to(model.device)).item()
             if abs(cls_score - neg_score) > 1e-3:
                 print("negative score mismatch:", cls_score, neg_score)
@@ -406,6 +373,7 @@ def extract_embeddings_single_sample(model, head, tokenizer, user_data, save_pre
                 "rejected_score": neg_score,
             })
 
+    print(all_embeddings[0].shape)
     all_embeddings_tensor = torch.stack(all_embeddings, dim=0)
     print(f"Total embeddings shape: {all_embeddings_tensor.shape}")
     torch.save(all_embeddings_tensor, f"{save_prefix}.pt")
@@ -417,20 +385,27 @@ def extract_embeddings_single_sample(model, head, tokenizer, user_data, save_pre
     print(f"✅ Metadata saved to {save_prefix}.json")
 
 
+from transformers import AutoTokenizer, AutoModelForSequenceClassification
+
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--model_path",
+        type=str,
+        required=True,
+        help="Path to the reward model"
+    )
+    parser.add_argument(
+        "--save_prefix",
+        type=str,
+        required=True,
+        help="Prefix path to save extracted embeddings"
+    )
+    return parser.parse_args()
+
+
 def main():
     args = parse_args()
-
-
-    add_history = (not args.no_history)
-
-    output_records = build_output_records(
-        user_ids=user_ids,
-        data_user=data_user,
-        data_dialog=data_dialog,
-        add_textual_info=args.add_textual_info,
-        add_history=add_history,
-        aggregate_rejected=args.aggregate_rejected,
-    )
 
     torch_dtype = torch.bfloat16
     device = "cuda:0"
@@ -443,12 +418,13 @@ def main():
         device_map=device,
         attn_implementation="flash_attention_2",
     )
+
     cls_head = model.score
 
     extract_embeddings_single_sample(
-        model=model,
-        head=cls_head,
-        tokenizer=tokenizer,
+        model,
+        cls_head,
+        tokenizer,
         user_data=output_records,
         save_prefix=args.save_prefix,
     )

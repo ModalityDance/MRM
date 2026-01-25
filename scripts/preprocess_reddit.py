@@ -1,3 +1,4 @@
+import os
 from datasets import load_dataset
 from datasets import load_from_disk
 from collections import defaultdict
@@ -17,7 +18,7 @@ import argparse
 import torch
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 
-
+os.makedirs("data/emb/reddit", exist_ok=True)
 dataset = load_dataset("openai/summarize_from_feedback", "comparisons")
 
 df_train = pd.DataFrame(dataset["train"])

@@ -126,7 +126,7 @@ def build_prism_dataset(
                         for j in range(n):
                             if i == j:
                                 continue
-                            diff = cand_list[i]["score"] - cand_list[j]["score"]
+                            diff = abs(cand_list[i]["score"] - cand_list[j]["score"])
                             if diff > threshold:
                                 pairs.append({
                                     "conv_id": conv_entries[0]["conversation_id"],
@@ -145,7 +145,7 @@ def build_prism_dataset(
                     train_examples.extend(augment_conv(conv_entries))
                 else:
                     for e in conv_entries:
-                        diff = e["chosen_score"] - e["rejected_score"]
+                        diff = abs(e["chosen_score"] - e["rejected_score"])
                         if diff > threshold:
                             train_examples.append({
                                 "conv_id": e["conversation_id"],
