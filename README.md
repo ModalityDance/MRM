@@ -151,9 +151,9 @@ bash scripts/test_on_reddit.sh
 ## 🧪 Usage Example <span id="usage-example"></span>
 
 This example shows a typical workflow for a **single user**:
-1) encode text pairs with Skywork-Reward-V2-Llama-3.1-8B into embeddings,
-2) adapt the MRM on the user's few-shot examples (update `shared_weight` only),
-3) run inference on new pairs for that same user.
+1) Encode text pairs with Skywork-Reward-V2-Llama-3.1-8B into embeddings,
+2) Adapt the MRM on the user's few-shot examples (update `shared_weight` only),
+3) Run inference on new pairs for that same user.
 
 ```python
 import torch
