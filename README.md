@@ -8,7 +8,7 @@
 <div align="center">
 
   <!-- Paper Link -->
-  <a href="{paper_url}">
+  <a href="https://www.arxiv.org/pdf/2601.18731">
     <img src="https://img.shields.io/badge/Paper-arXiv-b31b1b?style=for-the-badge&logo=arxiv" alt="Paper" height="22">
   </a>
 
@@ -301,11 +301,14 @@ This project is licensed under the **MIT License**. Please refer to the LICENSE 
 If you use **Meta Reward Modeling** in your research or applications, please consider citing:
 
 ```bibtex
-@article{yourproject2025,
-  title        = {{Project Name}: {Short descriptive subtitle}},
-  author       = {Your Name and Collaborator Name and Others},
-  journal      = {arXiv preprint arXiv:{xxxx.xxxxx}},
-  year         = {2025}
+@misc{cai2026adaptsanymetareward,
+      title={One Adapts to Any: Meta Reward Modeling for Personalized LLM Alignment}, 
+      author={Hongru Cai and Yongqi Li and Tiezheng Yu and Fengbin Zhu and Wenjie Wang and Fuli Feng and Wenjie Li},
+      year={2026},
+      eprint={2601.18731},
+      archivePrefix={arXiv},
+      primaryClass={cs.CL},
+      url={https://arxiv.org/abs/2601.18731}, 
 }
 ```
 
