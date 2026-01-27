@@ -12,7 +12,7 @@
     <img src="https://img.shields.io/badge/Paper-arXiv-b31b1b?style=for-the-badge&logo=arxiv" alt="Paper" height="22">
   </a>
 
-  <a href="https://huggingface.co/papers/">
+  <a href="https://huggingface.co/papers/2601.18731">
     <img src="https://img.shields.io/badge/HuggingFace-Papers-fcc21b?style=for-the-badge&logo=huggingface&logoColor=white" alt="HF Papers"  height="22">
   </a>
 
