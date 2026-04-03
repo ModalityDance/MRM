@@ -50,6 +50,8 @@ This project provides a full implementation of MRM, where each user’s preferen
 ## 🔥 News 
 
 <div style="max-height: 240px; overflow-y: auto;">
+  
+- **[2026.04]** ✨✨MRM is accepted by **SIGIR 2026** !!!✨✨
 
 - **[2026.01]** 🎉🎉Initial release of the project.
 
