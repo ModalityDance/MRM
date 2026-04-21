@@ -303,14 +303,12 @@ This project is licensed under the **MIT License**. Please refer to the LICENSE 
 If you use **Meta Reward Modeling** in your research or applications, please consider citing:
 
 ```bibtex
-@misc{cai2026adaptsanymetareward,
-      title={One Adapts to Any: Meta Reward Modeling for Personalized LLM Alignment}, 
-      author={Hongru Cai and Yongqi Li and Tiezheng Yu and Fengbin Zhu and Wenjie Wang and Fuli Feng and Wenjie Li},
-      year={2026},
-      eprint={2601.18731},
-      archivePrefix={arXiv},
-      primaryClass={cs.CL},
-      url={https://arxiv.org/abs/2601.18731}, 
+@inproceedings{cai2026MRM,
+  title={One Adapts to Any: Meta Reward Modeling for Personalized LLM Alignment},
+  author={Hongru Cai and Yongqi Li and Tiezheng Yu and Fengbin Zhu and Wenjie Wang and Fuli Feng and Wenjie Li},
+  booktitle={Proceedings of the 49th International ACM SIGIR Conference on Research and Development in Information Retrieval},
+  series={SIGIR '26},
+  year={2026}
 }
 ```
 
